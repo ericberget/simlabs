@@ -40,3 +40,36 @@ All settings are at the top of `assets/site.js`.
 - Montage photos: tap to show full color on touch screens (no hover there)
 - Dial sounds (made in code with Web Audio, no files) with a Sound on/off switch that remembers the visitor's choice
 - Reviewed alt text; skip link; visible keyboard focus; reduced-motion respected throughout
+
+## Analytics
+
+Tracking is built in but switched off until you add an ID. At the top of `assets/site.js`:
+
+```js
+const ANALYTICS = { provider: 'ga4', ga4Id: 'G-XXXXXXXXXX', ... };
+```
+
+Paste Woven's Google Analytics 4 measurement ID into `ga4Id` and publish. (Umami also works: set `provider: 'umami'` and `umamiId`.)
+Set `debug: true` to see each event in the browser console while testing.
+
+**The two main numbers**
+- **Visits:** counted automatically by GA4 (Reports → Acquisition / Engagement). Add UTM tags to links you send out
+  (e.g. `?utm_source=linkedin&utm_campaign=simlab`) so GA4 shows where visitors came from.
+- **Reach-outs:** the `generate_lead` event fires when the contact form is sent successfully (needs `FORM_ENDPOINT` set).
+  In GA4, mark `generate_lead` as a **key event** (Admin → Events) so it shows as a conversion rate against visits.
+
+**Supporting events**
+
+| Event | When it fires | Details sent |
+|---|---|---|
+| `demo_button_click` | A "Request a demo" button or link is clicked | `location` (nav / page) |
+| `request_lab_click` | "Request this lab" is clicked | `problem`, `people`, `setting` |
+| `generate_lead` | Contact form sent successfully | `lab_attached` (true/false) |
+| `dial_board_used` | First dial turn in a visit | – |
+| `dial_turn` | Every dial turn | `dial`, `setting` |
+| `phase_view` | A "How it works" step is clicked | `phase` |
+| `material_open` | An "In the room" info pop-up is opened | `material` |
+| `video_play` | A video pop-up is opened | `video` |
+| `section_view` | A section scrolls into view (once per visit) | `section` |
+
+Check with Woven's Digital team whether a cookie consent banner is required before switching GA4 on (EU/UK visitors).

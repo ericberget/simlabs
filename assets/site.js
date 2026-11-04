@@ -21,11 +21,66 @@ const VIDEOS = {
 const FORM_ENDPOINT = '';
 const CONTACT_EMAIL = '[CONTACT EMAIL]';
 
+// Analytics. Paste Woven's Google Analytics 4 measurement ID (looks like 'G-XXXXXXXXXX') to switch it on.
+// Leave '' and nothing is loaded or sent. Set debug: true to see every event in the browser console instead.
+// Umami also works: set provider: 'umami' and fill umamiId (the site's Website ID).
+const ANALYTICS = {
+  provider: 'ga4',        // 'ga4' or 'umami'
+  ga4Id: '',
+  umamiId: '',
+  umamiSrc: 'https://cloud.umami.is/script.js',
+  debug: false
+};
+
 /* --------------------------------------------------------------- */
 
 (function () {
   'use strict';
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Analytics ----------
+     Page visits are counted automatically by the analytics tool.
+     track() records the actions listed in the README. Without an ID it does nothing. */
+  const track = (() => {
+    const A = ANALYTICS;
+    let send = null;
+    try {
+      if (A.provider === 'ga4' && A.ga4Id) {
+        const s = document.createElement('script');
+        s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(A.ga4Id);
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', A.ga4Id);
+        send = (name, params) => window.gtag('event', name, params || {});
+      } else if (A.provider === 'umami' && A.umamiId) {
+        const s = document.createElement('script');
+        s.defer = true; s.src = A.umamiSrc; s.setAttribute('data-website-id', A.umamiId);
+        document.head.appendChild(s);
+        send = (name, params) => { if (window.umami) window.umami.track(name, params || {}); };
+      }
+    } catch (e) { send = null; }
+    return (name, params) => {
+      if (A.debug) console.log('[analytics]', name, params || {});
+      if (send) { try { send(name, params); } catch (e) { /* never let tracking break the page */ } }
+    };
+  })();
+  const trackOnce = (() => { const seen = new Set(); return (key, name, params) => { if (seen.has(key)) return; seen.add(key); track(name, params); }; })();
+
+  // "Request a demo" buttons (nav, mobile menu, hero links to the form)
+  document.querySelectorAll('a[href="#contact"]').forEach((a) => a.addEventListener('click', () => {
+    const where = a.closest('.site-header') ? 'nav' : a.id === 'request-lab' ? 'lab' : 'page';
+    if (where !== 'lab') track('demo_button_click', { location: where });
+  }));
+
+  // How far down the page people get (each section reported once per visit)
+  if ('IntersectionObserver' in window) {
+    const secIO = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (e.isIntersecting) { trackOnce('sec-' + e.target.id, 'section_view', { section: e.target.id }); secIO.unobserve(e.target); }
+    }), { threshold: 0.3 });
+    ['possible', 'how', 'field', 'materials', 'leaderboard', 'contact'].forEach((id) => { const el = document.getElementById(id); if (el) secIO.observe(el); });
+  }
 
   /* ---------- Mobile menu + sticky shadow ---------- */
   const header = document.querySelector('.site-header');
@@ -244,7 +299,11 @@ const CONTACT_EMAIL = '[CONTACT EMAIL]';
     dialsEl.appendChild(unit);
 
     const dial = unit.querySelector('.dial');
-    const step = (s) => { state[d.key] = (state[d.key] + s + n) % n; render(); Sound.turn(state[d.key], n); };
+    const step = (s) => {
+      state[d.key] = (state[d.key] + s + n) % n; render(); Sound.turn(state[d.key], n);
+      trackOnce('dials-used', 'dial_board_used');
+      track('dial_turn', { dial: d.name, setting: d.labels[state[d.key]] });
+    };
     dial.addEventListener('click', () => step(1));
     dial.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); step(1); }
@@ -387,6 +446,7 @@ const CONTACT_EMAIL = '[CONTACT EMAIL]';
   }
   function detachFormLab() { labAttached = false; formLab.hidden = true; labField.value = ''; }
   document.getElementById('request-lab').addEventListener('click', () => {
+    track('request_lab_click', { problem: PROBLEMS[state.problem].label, people: TEAMS[state.team].label, setting: FORMATS[state.format].label });
     labAttached = true; syncFormLab(); formLab.hidden = false;
   });
   document.getElementById('form-lab-remove').addEventListener('click', () => { detachFormLab(); document.getElementById('f-name').focus(); });
@@ -452,7 +512,7 @@ const CONTACT_EMAIL = '[CONTACT EMAIL]';
     swapTimer = setTimeout(() => { writePhase(i); phasePanel.classList.remove('swap'); }, 180);
   }
   phaseTabs.forEach((t, i) => {
-    t.addEventListener('click', () => showPhase(i, false));
+    t.addEventListener('click', () => { if (i !== phaseIdx) track('phase_view', { phase: t.querySelector('.phase-name').textContent }); showPhase(i, false); });
     t.addEventListener('keydown', (e) => {
       const n = phaseTabs.length;
       if (e.key === 'ArrowRight') { e.preventDefault(); showPhase((phaseIdx + 1) % n, true); }
@@ -473,6 +533,7 @@ const CONTACT_EMAIL = '[CONTACT EMAIL]';
   function openVideo(key, trigger) {
     const v = VIDEOS[key];
     if (!v) return;
+    track('video_play', { video: v.title });
     lastTrigger = trigger;
     mTitle.textContent = v.title;
     stage.replaceChildren();
@@ -543,6 +604,7 @@ const CONTACT_EMAIL = '[CONTACT EMAIL]';
     mSwap = setTimeout(() => { fillMaterial(mIdx); mdlg.classList.remove('swap'); }, 160);
   }
   mTiles.forEach((fig, i) => fig.querySelector('.mtile-info').addEventListener('click', (e) => {
+    track('material_open', { material: fig.querySelector('figcaption').textContent });
     e.stopPropagation();
     mOpener = e.currentTarget;
     showMaterial(i);
@@ -640,6 +702,7 @@ const CONTACT_EMAIL = '[CONTACT EMAIL]';
         body: JSON.stringify(Object.fromEntries(new FormData(form)))
       });
       if (!res.ok) throw new Error(res.status);
+      track('generate_lead', { form: 'contact', lab_attached: Boolean(labField.value) });
       form.reset();
       detachFormLab();
       showStatus('Thanks. We got your request and will be in touch soon.', 'ok');
