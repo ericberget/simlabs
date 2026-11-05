@@ -79,7 +79,7 @@ const ANALYTICS = {
     const secIO = new IntersectionObserver((entries) => entries.forEach((e) => {
       if (e.isIntersecting) { trackOnce('sec-' + e.target.id, 'section_view', { section: e.target.id }); secIO.unobserve(e.target); }
     }), { threshold: 0.3 });
-    ['possible', 'how', 'field', 'materials', 'leaderboard', 'contact'].forEach((id) => { const el = document.getElementById(id); if (el) secIO.observe(el); });
+    ['possible', 'how', 'materials', 'leaderboard', 'contact'].forEach((id) => { const el = document.getElementById(id); if (el) secIO.observe(el); });
   }
 
   /* ---------- Mobile menu + sticky shadow ---------- */
@@ -512,7 +512,7 @@ const ANALYTICS = {
     swapTimer = setTimeout(() => { writePhase(i); phasePanel.classList.remove('swap'); }, 180);
   }
   phaseTabs.forEach((t, i) => {
-    t.addEventListener('click', () => { if (i !== phaseIdx) track('phase_view', { phase: t.querySelector('.phase-name').textContent }); showPhase(i, false); });
+    t.addEventListener('click', () => { const h = document.getElementById('phase-hint'); if (h) h.classList.add('is-done'); if (i !== phaseIdx) track('phase_view', { phase: t.querySelector('.phase-name').textContent }); showPhase(i, false); });
     t.addEventListener('keydown', (e) => {
       const n = phaseTabs.length;
       if (e.key === 'ArrowRight') { e.preventDefault(); showPhase((phaseIdx + 1) % n, true); }

@@ -378,13 +378,22 @@ main.wrap { padding-top: 12px; padding-bottom: 12px; display: flex; flex-directi
   transition: all .35s cubic-bezier(.3, 1.4, .5, 1); z-index: -1;
 }
 .phase-dot { position: relative; font-size: 18px; font-weight: 600; z-index: 0; }
-.phase-step:hover .phase-dot::before { border-color: var(--c); }
 .phase-step[aria-selected="true"] .phase-dot { font-size: 24px; font-weight: 700; color: var(--navy); }
 .phase-step[aria-selected="true"] .phase-dot::before {
   width: 72px; height: 72px; background: var(--c); border-color: var(--c);
   box-shadow: 0 8px 24px color-mix(in srgb, var(--c) 45%, transparent);
 }
 .phase-step.done .phase-dot::before { border-color: color-mix(in srgb, var(--fill, var(--blue)) 60%, #CBD5DE); }
+.phase-step:not([aria-selected="true"]):hover .phase-dot::before {
+  border-color: var(--c); background: color-mix(in srgb, var(--c) 22%, #fff);
+  transform: scale(1.14); box-shadow: 0 6px 18px color-mix(in srgb, var(--c) 35%, transparent);
+}
+.phase-step:not([aria-selected="true"]):hover .phase-name { color: var(--navy); }
+.phase-step:not([aria-selected="true"]):active .phase-dot::before { transform: scale(1.04); }
+.phase-hint { margin: -14px 0 -10px; text-align: center; font-size: 13px; color: var(--ink-3); transition: opacity .4s ease; }
+.phase-hint .hint-tap { display: none; }
+@media (hover: none) { .phase-hint .hint-click { display: none; } .phase-hint .hint-tap { display: inline; } }
+.phase-hint.is-done { opacity: 0; }
 .phase-name { font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); text-align: center; transition: color .3s ease; }
 .phase-step[aria-selected="true"] .phase-name { color: var(--navy); }
 .phase-step:focus-visible { outline: none; }

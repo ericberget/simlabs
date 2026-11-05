@@ -26,8 +26,7 @@ All settings are at the top of `assets/site.js`.
    Until then, submitting shows a note asking people to email instead. Nothing is sent.
    When someone clicks "Request this lab", their dial settings are copied into the form
    (hidden field `lab`, and the problem box if it's empty).
-3. **Placeholder copy** – search `index.html` for `[` to find the bracketed text: XFT challenge/approach/outcome
-   and the footer URL/email. Remove `class="tbd"` once real copy is in.
+3. **Placeholder copy** – search `index.html` for `[` to find the bracketed text: the footer URL and email. Remove `class="tbd"` once real copy is in.
 
 ## What changed from the design hand-off
 
