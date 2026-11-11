@@ -545,7 +545,7 @@ main.wrap { padding-top: 12px; padding-bottom: 12px; display: flex; flex-directi
   .mtile-info { top: 10px; right: 10px; }
 }
 @media (prefers-reduced-motion: reduce) { .mdialog[open] { animation: none; } }
-.m-map { grid-area: map; } .m-map img { object-position: center 55%; }
+.m-map { grid-area: map; } .m-map img { object-position: center 50%; }
 .m-video { grid-area: video; } .m-video img { object-position: 70% center; }
 .m-board { grid-area: board; } .m-board img { object-position: left top; }
 .m-cards { grid-area: cards; } .m-cards img { object-position: 30% center; }
