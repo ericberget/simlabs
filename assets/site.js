@@ -151,7 +151,7 @@ const ANALYTICS = {
     { label: 'Live, in the room', short: 'live, in the room', inc: 'Room-to-room discovery in a live meeting space' },
     { label: 'Hybrid meeting', short: 'across in-room and remote teams', inc: 'One shared scenario on iPads and laptops, so remote and in-room teams play on one board' },
     { label: 'Virtual, on demand', short: 'virtually, on their own time', inc: 'Avatar-led practice conversations with branching feedback, available any time' },
-    { label: 'Six-month series', short: 'as a six-month series', inc: 'A kickoff lab followed by monthly micro-challenges and branching refreshers' }
+    { label: 'Six-month series', short: 'as a six\u2060-\u2060month series', inc: 'A kickoff lab followed by monthly micro-challenges and branching refreshers' }
   ];
   const LEVELS = ['Low', 'Medium', 'High'];
   const COMP_FX = ['Team reflection, no scores shown', 'Scored rubric with an end-of-day Showdown', 'Live leaderboard all day, with team certification'];
