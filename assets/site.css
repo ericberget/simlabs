@@ -623,6 +623,8 @@ main.wrap { padding-top: 12px; padding-bottom: 12px; display: flex; flex-directi
   border: 1px solid var(--field-line); border-radius: 14px; padding: 15px 18px; width: 100%;
 }
 .form textarea { resize: vertical; min-height: 110px; }
+.form label .opt { font-weight: 500; color: var(--ink-3); }
+.form textarea::placeholder { color: #8A96A3; }
 .form input:focus, .form textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 25%, transparent); background: #fff; }
 .form [aria-invalid="true"] { border-color: #C8323A; }
 .field-err { font-size: 13px; font-weight: 500; color: #B42830; min-height: 0; }
