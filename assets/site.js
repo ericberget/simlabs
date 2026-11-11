@@ -17,7 +17,23 @@ const VIDEOS = {
   instructions: { src: '', title: 'Instructions video',              poster: 'images/instructions-video-still.jpg' }
 };
 
-// Where the contact form posts (Formspree, HubSpot, Netlify, your own endpoint...). Leave '' until it's set up.
+// Contact form → HubSpot. Fill in portalId and formGuid from the HubSpot form (see README).
+// `fields` maps each site field to the HubSpot property's internal name. The two custom ones must exist in HubSpot
+// and be added to that HubSpot form. If the account is in HubSpot's EU data center, set host to 'api-eu1.hsforms.com'.
+const HUBSPOT = {
+  portalId: '',
+  formGuid: '',
+  host: 'api.hsforms.com',
+  fields: {
+    firstname: 'firstname',
+    lastname: 'lastname',
+    email: 'email',
+    company: 'company',
+    context: 'sim_lab_additional_context',   // custom contact property (multi-line text)
+    lab: 'sim_lab_setup'                      // custom contact property (single-line text): the visitor's dial settings
+  }
+};
+// Optional fallback if not using HubSpot: any endpoint that accepts a JSON POST (Formspree etc.). Leave '' otherwise.
 const FORM_ENDPOINT = '';
 const CONTACT_EMAIL = '[CONTACT EMAIL]';
 
@@ -681,37 +697,60 @@ const ANALYTICS = {
   const status = document.getElementById('form-status');
   const showStatus = (msg, kind) => { status.textContent = msg; status.className = 'form-status' + (kind ? ' ' + kind : ''); status.hidden = false; };
 
+  const getCookie = (n) => { try { const m = document.cookie.match('(?:^|; )' + n + '=([^;]*)'); return m ? decodeURIComponent(m[1]) : ''; } catch (e) { return ''; } };
+  const useHubSpot = Boolean(HUBSPOT.portalId && HUBSPOT.formGuid);
+
+  function sendToHubSpot(data) {
+    const fields = Object.keys(HUBSPOT.fields)
+      .filter((k) => data[k] && String(data[k]).trim() !== '')
+      .map((k) => ({ objectTypeId: '0-1', name: HUBSPOT.fields[k], value: String(data[k]).trim() }));
+    const context = { pageUri: location.href, pageName: document.title };
+    const hutk = getCookie('hubspotutk'); // set by the HubSpot tracking code, if it's on the page
+    if (hutk) context.hutk = hutk;
+    return fetch('https://' + HUBSPOT.host + '/submissions/v3/integration/submit/' + encodeURIComponent(HUBSPOT.portalId) + '/' + encodeURIComponent(HUBSPOT.formGuid), {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ fields, context })
+    });
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = form.elements.name, email = form.elements.email;
+    const first = form.elements.firstname, last = form.elements.lastname, email = form.elements.email;
+    const msgs = new Map([[first, 'Add your first name so we know who to reply to.'], [last, 'Add your last name.'], [email, 'Add a work email we can reply to, like name@company.com.']]);
     let firstBad = null;
-    [name, email].forEach((f) => {
+    [first, last, email].forEach((f) => {
       const ok = f.value.trim() !== '' && f.checkValidity();
       f.setAttribute('aria-invalid', ok ? 'false' : 'true');
       if (!ok && !firstBad) firstBad = f;
     });
-    if (firstBad) {
-      showStatus(firstBad === name ? 'Add your name so we know who to reply to.' : 'Add a work email we can reply to, like name@company.com.', 'err');
-      firstBad.focus();
-      return;
-    }
-    if (!FORM_ENDPOINT) {
+    if (firstBad) { showStatus(msgs.get(firstBad), 'err'); firstBad.focus(); return; }
+    if (!useHubSpot && !FORM_ENDPOINT) {
       showStatus('This form isn’t connected yet. For now, please email ' + CONTACT_EMAIL + '.', '');
       return;
     }
+    const data = Object.fromEntries(new FormData(form));
     const btn = form.querySelector('button[type="submit"]');
     btn.disabled = true;
     try {
-      const res = await fetch(FORM_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(Object.fromEntries(new FormData(form)))
+      const res = useHubSpot ? await sendToHubSpot(data) : await fetch(FORM_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data)
       });
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) {
+        let body = null; try { body = await res.json(); } catch (x) { /* no JSON */ }
+        const types = ((body && body.errors) || []).map((x) => x.errorType);
+        if (types.includes('INVALID_EMAIL') || types.includes('BLOCKED_EMAIL')) {
+          email.setAttribute('aria-invalid', 'true'); email.focus();
+          showStatus('That email address wasn’t accepted. Use your work email, like name@company.com.', 'err');
+          return;
+        }
+        throw new Error(res.status + ' ' + types.join(','));
+      }
       track('generate_lead', { form: 'contact', lab_attached: Boolean(labField.value) });
       form.reset();
       detachFormLab();
       showStatus('Thanks. We got your request and will be in touch soon.', 'ok');
     } catch (err) {
+      if (ANALYTICS.debug) console.warn('[form]', err);
       showStatus('We couldn’t send that. Check your connection and try again, or email ' + CONTACT_EMAIL + '.', 'err');
     } finally {
       btn.disabled = false;

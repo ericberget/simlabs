@@ -296,10 +296,13 @@
         <p class="form-lab-more" id="form-lab-more"></p>
       </div>
       <div class="form-row">
-        <label for="f-name">Your name<input id="f-name" name="name" type="text" autocomplete="name" required></label>
-        <label for="f-email">Work email<input id="f-email" name="email" type="email" autocomplete="email" required></label>
+        <label for="f-first">First name<input id="f-first" name="firstname" type="text" autocomplete="given-name" required></label>
+        <label for="f-last">Last name<input id="f-last" name="lastname" type="text" autocomplete="family-name" required></label>
       </div>
-      <label for="f-company">Company<input id="f-company" name="company" type="text" autocomplete="organization"></label>
+      <div class="form-row">
+        <label for="f-email">Work email<input id="f-email" name="email" type="email" autocomplete="email" required></label>
+        <label for="f-company">Company<input id="f-company" name="company" type="text" autocomplete="organization"></label>
+      </div>
       <label for="f-problem"><span>Any additional context? <span class="opt">(optional)</span></span><textarea id="f-problem" name="context" rows="3" placeholder="Timing, the meeting it's for, anything else we should know"></textarea></label>
       <input type="hidden" name="lab" id="f-lab">
       <button class="btn btn-blue" type="submit">Request a demo →</button>

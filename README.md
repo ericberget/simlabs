@@ -78,3 +78,25 @@ Check with Woven's Digital team whether a cookie consent banner is required befo
 `images/og-image.jpg` (1200×630) is the thumbnail shown when the link is pasted into Teams, Slack, LinkedIn, email, etc.
 The `og:image` tags in `index.html` point to it by full address (`https://sim-labs-whc.netlify.app/...`). If the site moves
 to a new domain, update those addresses. Bump the `?v=2` number whenever you replace the image so apps fetch the new one.
+
+## Connecting the form to HubSpot
+
+The form sends straight to HubSpot from the page (HubSpot's Forms submission API, no login or server needed).
+Someone with HubSpot admin access does steps 1–3:
+
+1. **Create two contact properties** (Settings → Properties → Contact properties):
+   - `Sim Lab setup` (single-line text). Internal name must be `sim_lab_setup`.
+   - `Sim Lab additional context` (multi-line text). Internal name must be `sim_lab_additional_context`.
+   If HubSpot gives them different internal names, change them in the `HUBSPOT.fields` block in `assets/site.js`.
+2. **Create a form** in HubSpot (Marketing → Forms) with these fields: First name, Last name, Email, Company,
+   Sim Lab setup, Sim Lab additional context. It's never shown on the page; it's where submissions land.
+   Set notifications on it so the right people get an email for each request.
+3. **Copy two IDs** from the form's embed code: `portalId` and `formId`.
+4. **Paste them** into `HUBSPOT.portalId` and `HUBSPOT.formGuid` at the top of `assets/site.js` and publish.
+5. **Test**: submit once with your own details and check the contact appears in HubSpot with the Sim Lab fields filled.
+
+Notes
+- EU-hosted HubSpot accounts: set `HUBSPOT.host` to `'api-eu1.hsforms.com'` if submissions return "form not found".
+- If Woven's HubSpot tracking code is added to the page, submissions are linked to the visitor's browsing history automatically.
+- Set `CONTACT_EMAIL` to a real address; it's shown if a submission fails.
+- A successful submission also fires the `generate_lead` analytics event.
