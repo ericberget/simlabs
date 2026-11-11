@@ -549,7 +549,7 @@ main.wrap { padding-top: 12px; padding-bottom: 12px; display: flex; flex-directi
 .m-video { grid-area: video; } .m-video img { object-position: 70% center; }
 .m-board { grid-area: board; } .m-board img { object-position: left top; }
 .m-cards { grid-area: cards; } .m-cards img { object-position: 30% center; }
-.m-barrier { grid-area: barrier; } .m-barrier img { object-position: 50% 25%; }
+.m-barrier { grid-area: barrier; } .m-barrier img { object-position: 50% 30%; }
 .m-table { grid-area: table; }
 
 /* ---------- 06 Leaderboard ---------- */
