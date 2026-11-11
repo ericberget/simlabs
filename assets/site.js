@@ -302,6 +302,7 @@ const ANALYTICS = {
     const step = (s) => {
       state[d.key] = (state[d.key] + s + n) % n; render(); Sound.turn(state[d.key], n);
       trackOnce('dials-used', 'dial_board_used');
+      autoAttachFormLab();
       track('dial_turn', { dial: d.name, setting: d.labels[state[d.key]] });
     };
     dial.addEventListener('click', () => step(1));
@@ -444,12 +445,16 @@ const ANALYTICS = {
     formLabMore.textContent = 'Competition: ' + LEVELS[state.comp] + ' · Time pressure: ' + LEVELS[state.tp] + ' · ' + SIZE_LABELS[state.size];
     labField.value = chips.map((x) => x[0]).join(' · ') + ' · ' + formLabMore.textContent;
   }
+  var labRemoved = false; // set when the visitor clicks "Remove"; stops dial turns from re-adding it
+  function attachFormLab() { labAttached = true; syncFormLab(); formLab.hidden = false; }
   function detachFormLab() { labAttached = false; formLab.hidden = true; labField.value = ''; }
+  // Turning any dial fills the form's "Your lab" box right away, so it's there when they scroll down.
+  function autoAttachFormLab() { if (!labAttached && !labRemoved) attachFormLab(); }
   document.getElementById('request-lab').addEventListener('click', () => {
     track('request_lab_click', { problem: PROBLEMS[state.problem].label, people: TEAMS[state.team].label, setting: FORMATS[state.format].label });
-    labAttached = true; syncFormLab(); formLab.hidden = false;
+    labRemoved = false; attachFormLab();
   });
-  document.getElementById('form-lab-remove').addEventListener('click', () => { detachFormLab(); document.getElementById('f-name').focus(); });
+  document.getElementById('form-lab-remove').addEventListener('click', () => { labRemoved = true; detachFormLab(); document.getElementById('f-name').focus(); });
 
   /* ---------- How it works: six-phase stepper ---------- */
   const PHASES = [
