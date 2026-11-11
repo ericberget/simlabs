@@ -516,30 +516,35 @@ main.wrap { padding-top: 12px; padding-bottom: 12px; display: flex; flex-directi
 .mtile-info:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* Material details dialog */
-.mdialog { width: min(980px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: none; border-radius: 28px; background: var(--surface); color: var(--ink); overflow: auto; }
+.mdialog { width: min(1040px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: none; border-radius: 28px; background: var(--surface); color: var(--ink); overflow: auto; }
 .mdialog::backdrop { background: rgba(11, 34, 54, 0.72); }
 .mdialog[open] { animation: mdIn .28s cubic-bezier(.2, .8, .2, 1); }
 @keyframes mdIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
-.mdialog-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); min-height: 380px; }
-.mdialog-media { background: var(--panel); min-height: 260px; }
-.mdialog-media img { width: 100%; height: 100%; object-fit: cover; }
-.mdialog-text { padding: 26px 30px 28px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* Photo on top, shown whole (never cropped); text and buttons underneath */
+.mdialog-card { display: flex; flex-direction: column; }
+.mdialog-media { background: #0B1016; display: flex; justify-content: center; }
+.mdialog-media img { display: block; width: auto; max-width: 100%; height: auto; max-height: min(62vh, 620px); object-fit: contain; }
+.mdialog-text { padding: 22px 30px 24px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "top top" "title nav" "desc nav" "video video"; gap: 8px 32px; align-items: start; min-width: 0; }
+.mdialog-top { grid-area: top; }
+.mdialog-title { grid-area: title; }
+.mdialog-desc { grid-area: desc; max-width: 64ch; }
+.mdialog-video { grid-area: video; }
+.mdialog-nav { grid-area: nav; align-self: end; }
 .mdialog-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .mdialog-count { font-size: 12px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--blue-ink); }
 .mdialog-close { width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--field-line); background: var(--surface); color: var(--navy); font-size: 22px; line-height: 1; cursor: pointer; }
 .mdialog-close:hover { background: var(--field); }
-.mdialog-title { margin: 6px 0 0; font-size: 30px; line-height: 1.1; font-weight: 600; text-transform: uppercase; }
+.mdialog-title { margin: 2px 0 0; font-size: 28px; line-height: 1.1; font-weight: 600; text-transform: uppercase; }
 .mdialog-desc { margin: 0; font-size: 17px; line-height: 1.6; color: var(--ink-2); }
 .mdialog-video video { width: 100%; border-radius: 14px; background: #000; display: block; }
-.mdialog-nav { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px; }
+.mdialog-nav { display: flex; justify-content: flex-end; gap: 10px; }
 .mdialog-step { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--field-line); background: var(--surface); color: var(--navy); font-size: 14px; font-weight: 600; cursor: pointer; }
 .mdialog-step:hover { border-color: var(--navy); }
 .mdialog-text > .mdialog-title, .mdialog-text > .mdialog-desc, .mdialog-media img { transition: opacity .2s ease; }
 .mdialog.swap .mdialog-title, .mdialog.swap .mdialog-desc, .mdialog.swap .mdialog-media img { opacity: 0; }
 @media (max-width: 720px) {
-  .mdialog-card { grid-template-columns: 1fr; min-height: 0; }
-  .mdialog-media { min-height: 0; aspect-ratio: 16 / 10; }
-  .mdialog-text { padding: 20px 20px 22px; }
+  .mdialog-text { padding: 18px 20px 20px; grid-template-columns: 1fr; grid-template-areas: "top" "title" "desc" "video" "nav"; }
+  .mdialog-nav { justify-content: space-between; padding-top: 6px; }
   .mdialog-title { font-size: 24px; }
   .mdialog-desc { font-size: 16px; }
   .mtile-info { top: 10px; right: 10px; }
