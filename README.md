@@ -72,3 +72,9 @@ Set `debug: true` to see each event in the browser console while testing.
 | `section_view` | A section scrolls into view (once per visit) | `section` |
 
 Check with Woven's Digital team whether a cookie consent banner is required before switching GA4 on (EU/UK visitors).
+
+## Link preview (share image)
+
+`images/og-image.jpg` (1200×630) is the thumbnail shown when the link is pasted into Teams, Slack, LinkedIn, email, etc.
+The `og:image` tags in `index.html` point to it by full address (`https://sim-labs-whc.netlify.app/...`). If the site moves
+to a new domain, update those addresses. Bump the `?v=2` number whenever you replace the image so apps fetch the new one.
